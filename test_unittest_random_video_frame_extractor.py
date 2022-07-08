@@ -35,7 +35,50 @@ TESTS TO RUN (PER FUNCTION):
         - test with .MOV files
 """
 
+
 import unittest
 import random_video_frame_extractor as extractor
 
-# pass
+
+class TestInitParser(unittest.TestCase):
+    pass
+    
+    
+class TestCaptureFramesArgParser(unittest.TestCase):
+    pass
+
+    # testing "-n" arg handling
+    def test_n_samples_arg(self):
+        """
+        Testing argument handling for "-n" option
+        """
+        pass
+    
+    # testing "-o" arg handling
+    def test_output_destination_arg(self):
+        """
+        Testing argument handling for "-o" option
+        """
+        pass
+        
+    # testing "-e" arg handling
+    def test_output_file_ext_arg(self):
+        """
+        Testing argument handling for "-e" option
+        """
+        pass
+    
+    # testing "-v" arg handling
+    def test_verbose_arg(self):
+        """
+        Testing argument handling for "-v" option
+        """
+        pass
+    
+    # testing "video_source" arg handling
+    def test_input_video_source_arg(self):
+        """
+        Testing argument handling for "video_source" option
+        """
+        pass
+    
