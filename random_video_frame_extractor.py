@@ -74,6 +74,10 @@ def capture_frames_driver(parser_args):
     """
     Primary driver function to save image files.
     """
+    
+    # defining sample limit (min/max samples allowed per script execution)
+    MIN_SAMPLES_PER_RUN = 1
+    MAX_SAMPLES_PER_RUN = 100
 
     cap = cv2.VideoCapture(args.video_source)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -82,23 +86,25 @@ def capture_frames_driver(parser_args):
     new_filename = new_filename_pattern.format(0)
 
     # argparsing (-n): check that <n> is within allowed bounds
-    if args.n < 1 or args.n > 100:
+    if args.n < MIN_SAMPLES_PER_RUN or args.n > MAX_SAMPLES_PER_RUN:
         print("Error: argument 'n' must be between 1 and 100 (inclusive)")
         exit(1)
 
     # informational output
     if args.verbose:
+    
+        # if output path specified, add string to printable information
+        output_path_str = f"Target directory: {args.o}\n" if args.o else ""
+    
         print(
             "\n"
             f"Source: {args.video_source}\n"
             f"Total frames: {total_frames}\n"
             f"Frames to sample: {args.n}"
+            f"{output_path_str}"
         )
-        if args.o:
-            print(f"Target directory: {args.o}\n")
-
+        
         print("Now capturing random frames...")
-    
 
     # argparsing (-n): capture <n> randomly sampled frames
     last_match = -1
@@ -119,7 +125,7 @@ def capture_frames_driver(parser_args):
                 last_match = int(match.group(1))
 
         if args.verbose:
-            print(f"updated 'last_match' to {last_match}")    
+            print(f"file number incremented to {last_match}")    
         new_suffix = int(last_match) + 1
         new_filename = new_filename_pattern.format(new_suffix)
         new_filename = os.path.join(args.o, new_filename)
