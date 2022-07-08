@@ -70,9 +70,11 @@ def init_parser():
     return parser
 
 
-def capture_frames_driver(parser_args):
+def capture_frames_driver(args) -> bool:
     """
     Primary driver function to save image files.
+    
+    Return False if error, otherwise return True.
     """
     
     # defining sample limit (min/max samples allowed per script execution)
@@ -88,7 +90,7 @@ def capture_frames_driver(parser_args):
     # argparsing (-n): check that <n> is within allowed bounds
     if args.n < MIN_SAMPLES_PER_RUN or args.n > MAX_SAMPLES_PER_RUN:
         print("Error: argument 'n' must be between 1 and 100 (inclusive)")
-        exit(1)
+        return False
 
     # informational output
     if args.verbose:
