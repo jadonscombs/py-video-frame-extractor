@@ -38,11 +38,12 @@ TESTS TO RUN (PER FUNCTION):
 TODO:
 - add timeit functionality (test testing performance/metrics)
 - HIGH PRIORITY: auto-deletion of frames/images generated during testing
+- add new tests to test <frame_capture_components.py>
 """
 
 
 import unittest
-import random_video_frame_extractor as extractor
+import frame_capture_components as extractor
 import traceback
     
     
