@@ -46,17 +46,19 @@ def init_parser():
     )
 
     # (-n): optional arg., number of randomly sampled frames to save
-    parser.add_argument('-n', type=int, default=1,
+    parser.add_argument('-n', type=int, default=1, metavar="N_FRAMES",
                         help="specify desired number of random frames to save")
 
-    # TODO: (-p): optional arg., file naming pattern to follow
+    # (-p): optional arg., file naming pattern to follow
+    parser.add_argument('-p', type=str, metavar="PATTERN",
+                        help="specify filename prefix for newly created files")
 
     # (-o): specify output path to save images
-    parser.add_argument('-o', type=str, default="",
-                        help="specify output path to save images")
+    parser.add_argument('-o', type=str, default="", metavar="OUTPUT_DIR",
+                        help="specify output directory to save images")
 
     # (-e): specify output image type (png, jpeg, ...)
-    parser.add_argument('-e', type=str, default="png",
+    parser.add_argument('-e', type=str, default="png", metavar="FILETYPE",
                         help="specify output image type/extension")
 
     # (--verbose): enable verbose output (disabled by default)
@@ -64,7 +66,7 @@ def init_parser():
                         help="display detailed information during processing")
 
     # video_path: required arg., input video file path
-    parser.add_argument('video_source', type=str,
+    parser.add_argument('video_source', type=str, metavar="SOURCE",
                         help="specify source video filepath")
 
     return parser
@@ -83,9 +85,20 @@ def capture_frames_driver(args) -> bool:
 
     cap = cv2.VideoCapture(args.video_source)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    regex_filename_pattern = re.compile(r"img-extract-(\d+)\." + args.e)
-    new_filename_pattern = ("img-extract-{}." + args.e)
-    new_filename = new_filename_pattern.format(0)
+    
+    # argparsing (-p): the base filename prefix for new created files
+    #
+    # this affects the regex pattern used when searching for existing
+    # files with the same specified prefix string. a default prefix
+    # string will be used if the user does not supply one
+    if args.p:
+        new_filename_pattern = (args.p + "{}." + args.e)
+        new_filename = new_filename_pattern.format(0)
+        regex_filename_pattern = re.compile(args.p + r"(\d+)\." + args.e)
+    else:
+        new_filename_pattern = ("img-extract-{}." + args.e)
+        new_filename = new_filename_pattern.format(0)
+        regex_filename_pattern = re.compile(r"img-extract-(\d+)\." + args.e)
 
     # argparsing (-n): check that <n> is within allowed bounds
     if args.n < MIN_SAMPLES_PER_RUN or args.n > MAX_SAMPLES_PER_RUN:
@@ -96,13 +109,13 @@ def capture_frames_driver(args) -> bool:
     if args.verbose:
     
         # if output path specified, add string to printable information
-        output_path_str = f"Target directory: {args.o}\n" if args.o else ""
+        output_path_str = f"Target directory: {args.o}\n" if args.o else ".\n"
     
         print(
             "\n"
             f"Source: {args.video_source}\n"
             f"Total frames: {total_frames}\n"
-            f"Frames to sample: {args.n}"
+            f"Frames to sample: {args.n}\n"
             f"{output_path_str}"
         )
         
@@ -119,6 +132,10 @@ def capture_frames_driver(args) -> bool:
         # set target directory for 'os.listdir()' to search
         target_directory = args.o if bool(args.o) else None
         
+        # TODO: improve efficiency of loop(s), from O(N^2) to O(N)
+        #
+        # find the highest image number in current files;
+        # suffix for new filenames will start from 1 after this number
         for f in os.listdir(target_directory):
             match = regex_filename_pattern.match(f)
             if match:
@@ -127,7 +144,9 @@ def capture_frames_driver(args) -> bool:
                 last_match = int(match.group(1))
 
         if args.verbose:
-            print(f"file number incremented to {last_match}")    
+            print(f"file number incremented to {last_match}")
+        
+        # create new filename
         new_suffix = int(last_match) + 1
         new_filename = new_filename_pattern.format(new_suffix)
         new_filename = os.path.join(args.o, new_filename)
@@ -139,6 +158,8 @@ def capture_frames_driver(args) -> bool:
     # informational output
     if args.verbose:
         print(f"Operation complete: finished saving {n_writes} frames.")
+        
+    return True
 
 
 if __name__ == '__main__':
